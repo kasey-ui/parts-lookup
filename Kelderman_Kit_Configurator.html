@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelderman Kit Configurator — Version 2</title>
+<style>
+:root {
+  --bg:#0d1117; --card:#161b22; --card2:#1c2128; --border:#30363d;
+  --text:#c9d1d9; --dim:#8b949e; --accent:#238636; --accent-h:#2ea043;
+  --acc-bg:#1a2f1e; --red:#c41e3a; --gold:#e3b341; --info:#1f6feb; --radius:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+
+/* Header */
+.site-header{background:var(--card);border-bottom:1px solid var(--border);
+  padding:12px 20px;position:sticky;top:0;z-index:100}
+.header-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;
+  justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-k{width:36px;height:36px;background:var(--red);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:18px;color:#fff;flex-shrink:0}
+.brand-text{display:flex;flex-direction:column;line-height:1.2}
+.brand-name{font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.brand-sub{font-size:11px;color:var(--dim)}
+.header-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.year-field{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim)}
+.year-input{width:58px;padding:4px 7px;background:var(--bg);border:1px solid var(--border);
+  border-radius:5px;color:var(--text);font-size:12px;font-family:inherit}
+.build-badge{font-size:11px;color:var(--dim);background:var(--card2);
+  border:1px solid var(--border);border-radius:5px;padding:3px 10px;white-space:nowrap}
+.build-badge span{color:var(--gold);font-weight:600}
+.header-tools{display:flex;gap:8px}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--text);
+  border-radius:var(--radius);padding:6px 14px;font-size:13px;cursor:pointer;
+  transition:border-color .15s,background .15s}
+.btn-ghost:hover{border-color:var(--accent);background:var(--acc-bg)}
+
+/* Layout */
+.wrap{max-width:1300px;margin:20px auto 60px;padding:0 20px;
+  display:grid;grid-template-columns:1fr 390px;gap:20px;align-items:start}
+@media(max-width:920px){.wrap{grid-template-columns:1fr}}
+
+/* Steps */
+.steps{display:flex;flex-direction:column;gap:12px}
+.step-card{background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;transition:border-color .2s,opacity .2s}
+.step-card.locked{opacity:.4;pointer-events:none}
+.step-card.done{border-color:var(--accent)}
+.step-hd{display:flex;align-items:center;gap:10px;padding:11px 16px;
+  border-bottom:1px solid var(--border);background:var(--card2)}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--border);
+  color:var(--dim);font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-card.done .step-num{background:var(--accent);color:#fff}
+.step-title{font-weight:600;font-size:13px;flex:1}
+.step-badge{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;
+  padding:2px 8px;border-radius:20px;border:1px solid var(--border);
+  color:var(--dim);background:var(--card)}
+.step-badge.req{border-color:var(--red);color:var(--red);background:transparent}
+.step-badge.ref{border-color:var(--gold);color:var(--gold);background:transparent}
+.step-preview{font-size:11px;color:var(--accent-h);margin-left:auto;white-space:nowrap}
+.step-body{padding:14px 16px}
+
+/* Radio cards */
+.radio-group{display:flex;flex-direction:column;gap:6px}
+.rc{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+  border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;
+  transition:border-color .15s,background .15s}
+.rc:hover{border-color:var(--accent);background:var(--acc-bg)}
+.rc.active{border-color:var(--accent);background:var(--acc-bg)}
+.rc input[type=radio]{margin-top:3px;flex-shrink:0;accent-color:var(--accent)}
+.rc-label{font-size:13px;font-weight:600}
+.rc-sub{font-size:11px;color:var(--dim);margin-top:1px}
+.rc-price{font-size:12px;color:var(--gold);font-weight:600;margin-top:3px}
+.rc-pns{font-size:10.5px;color:var(--dim);margin-top:2px;font-family:monospace}
+
+/* Info boxes */
+.info-box{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+  border-radius:var(--radius);font-size:12px;line-height:1.5}
+.info-box.blue{border:1px solid var(--info);background:rgba(31,111,235,.08);color:var(--dim)}
+.info-box.gold{border:1px solid var(--gold);background:rgba(227,179,65,.08);color:var(--dim)}
+.info-box strong{color:var(--text)}
+
+/* Summary */
+.summary{background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);position:sticky;top:70px;overflow:hidden}
+.sum-hd{background:var(--card2);border-bottom:1px solid var(--border);
+  padding:12px 16px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+.sum-empty{padding:32px 16px;text-align:center;color:var(--dim);font-size:12px}
+.sum-sec{border-bottom:1px solid var(--border)}
+.sum-sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--dim);padding:8px 14px 3px}
+.sum-row{display:grid;grid-template-columns:auto 1fr auto auto;
+  gap:5px;padding:4px 14px;font-size:12px;align-items:baseline}
+.s-pn{font-family:monospace;font-size:11px;color:var(--dim);white-space:nowrap}
+.s-desc{color:var(--text);line-height:1.3}
+.s-qty{color:var(--dim);font-size:11px;white-space:nowrap;text-align:right}
+.s-price{font-weight:600;white-space:nowrap;text-align:right;min-width:60px}
+.s-free{color:var(--dim);font-style:italic}
+.s-note{grid-column:1/-1;font-size:10px;padding:0 0 4px;letter-spacing:.03em}
+.s-note.req{color:var(--red)}
+.s-note.ok{color:var(--accent-h)}
+.s-note.ref{color:var(--gold)}
+
+.sum-ref-row{padding:6px 14px;font-size:12px;border-bottom:1px solid var(--border)}
+.sum-ref-lbl{font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--gold);padding:8px 14px 3px}
+
+.sum-total-row{display:flex;justify-content:space-between;align-items:center;
+  padding:13px 14px 9px;border-top:2px solid var(--border)}
+.sum-total-lbl{font-size:13px;font-weight:700}
+.sum-total-amt{font-size:18px;font-weight:700;color:var(--accent-h)}
+.sum-note{font-size:10px;color:var(--dim);padding:0 14px 12px;line-height:1.5}
+.btn-print{display:block;width:calc(100% - 28px);margin:0 14px 14px;
+  padding:10px;background:var(--accent);color:#fff;border:none;
+  border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;
+  transition:background .15s}
+.btn-print:hover{background:var(--accent-h)}
+
+/* Print */
+@media print{
+  body{background:#fff;color:#111;font-size:11px}
+  .site-header,.steps,.btn-print,.header-tools{display:none!important}
+  .wrap{grid-template-columns:1fr;margin:0;padding:0}
+  .summary{position:static;border:none;border-radius:0}
+  .sum-hd{background:#f0f0f0;color:#111;border-bottom:1px solid #ccc}
+  .sum-sec-lbl{color:#555}.s-pn{color:#444}.s-desc,.s-qty,.s-price{color:#111}
+  .sum-total-row{border-top:2px solid #333}
+  .sum-total-amt{color:#1a7f37}
+  .s-note.req{color:#c00}.s-note.ok{color:#1a7f37}.s-note.ref{color:#8a6000}
+  .sum-ref-lbl{color:#8a6000}
+  .info-box{border-color:#999;background:#f8f8f8}
+  .print-hdr{display:block!important;padding-bottom:14px;margin-bottom:14px;border-bottom:2px solid #333}
+}
+.print-hdr{display:none}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-k">K</div>
+      <div class="brand-text">
+        <span class="brand-name">Kelderman</span>
+        <span class="brand-sub">Kit Configurator — Version 2 (Beta)</span>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div class="year-field">
+        <label for="year-in">Model Year</label>
+        <input class="year-input" id="year-in" type="text" value="2026" maxlength="4"
+          oninput="document.getElementById('print-year').textContent=this.value">
+      </div>
+      <div class="build-badge">Build # <span id="build-num"></span></div>
+    </div>
+    <div class="header-tools">
+      <button class="btn-ghost" onclick="resetAll()">↺ Reset</button>
+      <button class="btn-ghost" onclick="window.print()">⎙ Print</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="steps">
+
+    <div class="step-card" id="sc-body">
+      <div class="step-hd"><span class="step-num">1</span><span class="step-title">Body Style</span><span class="step-preview" id="pv-body"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-body"></div></div>
+    </div>
+
+    <div class="step-card locked" id="sc-kit">
+      <div class="step-hd"><span class="step-num">2</span><span class="step-title">Kit Type</span><span class="step-preview" id="pv-kit"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-kit"></div></div>
+    </div>
+
+    <!-- GM only: Drivetrain -->
+    <div class="step-card locked" id="sc-drive">
+      <div class="step-hd"><span class="step-num">3</span><span class="step-title">Drivetrain</span><span class="step-preview" id="pv-drive"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-drive"></div></div>
+    </div>
+
+    <!-- GM only: Build Scope -->
+    <div class="step-card locked" id="sc-scope">
+      <div class="step-hd"><span class="step-num">4</span><span class="step-title">Build Scope</span><span class="step-preview" id="pv-scope"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-scope"></div></div>
+    </div>
+
+    <!-- GM only: 2" Lift Spacers (4WD + front) -->
+    <div class="step-card locked" id="sc-spacers">
+      <div class="step-hd"><span class="step-num">5</span><span class="step-title">2&Prime; Lift Spacers</span><span class="step-badge">Optional · 4WD Only</span><span class="step-preview" id="pv-spacers"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-spacers"></div></div>
+    </div>
+
+    <!-- Ford only: Model -->
+    <div class="step-card locked" id="sc-model">
+      <div class="step-hd"><span class="step-num">3</span><span class="step-title">Model</span><span class="step-preview" id="pv-model"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-model"></div></div>
+    </div>
+
+    <div class="step-card locked" id="sc-axle">
+      <div class="step-hd"><span class="step-num">4</span><span class="step-title">Rear Axle Diameter</span><span class="step-preview" id="pv-axle"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-axle"></div></div>
+    </div>
+
+    <!-- 10-12" only: Box Length -->
+    <div class="step-card locked" id="sc-box">
+      <div class="step-hd"><span class="step-num">5</span><span class="step-title">Cab &amp; Box Configuration</span><span class="step-preview" id="pv-box"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-box"></div></div>
+    </div>
+
+    <!-- 10-12" only: Center Cradle -->
+    <div class="step-card locked" id="sc-cradle">
+      <div class="step-hd"><span class="step-num">6</span><span class="step-title">Center Cradle</span><span class="step-badge">Optional</span><span class="step-preview" id="pv-cradle"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-cradle"></div></div>
+    </div>
+
+    <div class="step-card locked" id="sc-shocks">
+      <div class="step-hd">
+        <span class="step-num">7</span>
+        <span class="step-title">Shock Package</span>
+        <span class="step-badge" id="sb-shocks">Optional</span>
+        <span class="step-preview" id="pv-shocks"></span>
+      </div>
+      <div class="step-body" id="sb-shocks-body"></div>
+    </div>
+
+    <!-- 10-12" only: Steering Gear Reference -->
+    <div class="step-card locked" id="sc-steering">
+      <div class="step-hd"><span class="step-num">8</span><span class="step-title">Cylinder Assist Steering Gear</span><span class="step-badge ref">Required · Customer-Sourced</span></div>
+      <div class="step-body">
+        <div class="info-box gold">
+          ⚠️ <div><strong>SK7550E — PSC Big Bore XD® Cylinder Assist® Steering Gear (Ford)</strong><br>
+          Required for this kit. Kelderman does not sell this part directly — provide the customer with part number SK7550E and direct them to <strong>Precision Steering Components (PSC)</strong> to source it. If installing in-house, coordinate separately.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card locked" id="sc-dss">
+      <div class="step-hd"><span class="step-num" id="sn-dss">9</span><span class="step-title">Dual Steering Stabilizer</span><span class="step-badge">Optional</span><span class="step-preview" id="pv-dss"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-dss"></div></div>
+    </div>
+
+    <div class="step-card locked" id="sc-arms">
+      <div class="step-hd"><span class="step-num" id="sn-arms">10</span><span class="step-title">Radius Arms</span><span class="step-badge" id="sb-arms">Optional</span><span class="step-preview" id="pv-arms"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-arms"></div></div>
+    </div>
+
+    <div class="step-card locked" id="sc-ctrl">
+      <div class="step-hd"><span class="step-num" id="sn-ctrl">11</span><span class="step-title">Air Management / Controls</span><span class="step-badge">Optional</span><span class="step-preview" id="pv-ctrl"></span></div>
+      <div class="step-body"><div class="radio-group" id="rg-ctrl"></div></div>
+    </div>
+
+  </div><!-- /steps -->
+
+  <!-- SUMMARY -->
+  <div class="summary">
+    <div class="print-hdr">
+      <div style="font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Kelderman Manufacturing — Kit Build Summary</div>
+      <div style="font-size:11px;color:#555;margin-top:4px">Build # <span id="print-build"></span> &nbsp;·&nbsp; Model Year: <span id="print-year">2026</span> &nbsp;·&nbsp; <span id="print-date"></span></div>
+    </div>
+    <div class="sum-hd">Build Summary</div>
+    <div id="sum-body"><div class="sum-empty">Select a body style to begin.</div></div>
+    <div id="sum-footer" style="display:none">
+      <div class="sum-total-row">
+        <span class="sum-total-lbl">Estimated Total (MSRP)</span>
+        <span class="sum-total-amt" id="total-amt">$0.00</span>
+      </div>
+      <div class="sum-note">* MSRP pricing. Contact dealer for quote. Part numbers subject to verification. SK7550E (PSC steering gear) not included in total — customer-sourced.</div>
+      <button class="btn-print" onclick="window.print()">⎙ Print Build Summary</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Init ──────────────────────────────────────────────────────
+const BUILD_ID = 'KLM-' + Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g,'').substr(0,6);
+document.getElementById('build-num').textContent   = BUILD_ID;
+document.getElementById('print-build').textContent = BUILD_ID;
+document.getElementById('print-date').textContent  =
+  'Printed ' + new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+// ── Parts ─────────────────────────────────────────────────────
+const P = {
+  // ── Stock Height Pickup Front ──
+  'KLM69003': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, Stock Height Front Air Suspension',                      msrp:1315},
+  'KLM69020': {desc:'Kit — 2023+ Ford F-450 Pickup, Stock Height Front Air Suspension',                             msrp:1315},
+  // ── Chassis Cab Front ──
+  'KLM69500': {desc:'Kit — 2017+ Ford F-450/F-550/F-600 Chassis Cab, Stock Height Front Air Suspension',            msrp:1315},
+  // ── 2-3" Lift Pickup Front ──
+  '10032358': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, 2-3" Lift Front (Incl. Adjustable Radius Arms)',          msrp:4630},
+  '10016213': {desc:'Kit — 2023+ Ford F-450 Pickup, 2-3" Lift Front (Incl. Adjustable Radius Arms)',                msrp:4630},
+  // ── 5-6" Lift Pickup Front ──
+  '10015169': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, 5-6" Lift Front (Incl. Fabricated Radius Arms)',          msrp:4630},
+  '10015956': {desc:'Kit — 2023+ Ford F-450 Pickup, 5-6" Lift Front (Incl. Radius Arms, No Steering Stabilizer)',   msrp:4630},
+  // ── 10-12" Lift Pickup Front (Cradle) ──
+  '10032606': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, 10-12" Lift Cradle Front (Cradle option)',                msrp:5180},
+  // ── Stock Height Pickup Rear ──
+  '10015188': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, Stock Height Rear, 3.5" Axle SRW',                        msrp:4725},
+  '10015168': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, Stock Height Rear, 4.0" Axle SRW',                        msrp:4725},
+  '10015113': {desc:'Kit — 2023+ Ford F-350/F-450 Pickup, Stock Height Rear, 4.5" Axle DRW',                        msrp:4725},
+  // ── 5-6" Lift Pickup Rear ──
+  '10015243': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, 5-6" Lift Rear, 3.5" Axle SRW',                          msrp:4850},
+  '10015242': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, 5-6" Lift Rear, 4.0" Axle SRW',                          msrp:4850},
+  '10015191': {desc:'Kit — 2023+ Ford F-350/F-450 Pickup, 5-6" Lift Rear, 4.5" Axle DRW',                          msrp:4850},
+  // ── 10-12" Lift Pickup Rear (Cradle) ──
+  '10040427': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, 10-12" Lift Cradle Rear, 3.5" Axle SRW',                 msrp:4850},
+  '10032609': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, 10-12" Lift Cradle Rear, 4.0" Axle SRW',                 msrp:4850},
+  '10040935': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, 10-12" Lift Cradle Rear, 4.5" Axle DRW',                 msrp:4850},
+  // ── Chassis Cab Rear ──
+  '10014700': {desc:'Kit — 2023+ Ford F-450/F-550/F-600 Chassis Cab, 4-Link Rear, Stock Height',                    msrp:5000},
+  '10029801': {desc:'Kit — 2023+ Ford F-450/F-550/F-600 Chassis Cab, 4-Link Rear, 2.5" Lowering',                   msrp:5000},
+  // ── Center Cradles (10-12") ──
+  '10032603': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, 10-12" Lift Cradle Center, 160WB Crew Cab Short Box',     msrp:5000},
+  '10040770': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup, 10-12" Lift Cradle Center, 176WB Crew Cab Long Box',      msrp:5000},
+  // ── Shocks — Pickup Remote Reservoir ──
+  '10008956': {desc:'Kit — Front & Rear Raptor 2.0 Remote Reservoir Shocks (2-Stage Front + Stock Height Rear)',     msrp:2100},
+  '10006722': {desc:'Kelderman-Raptor 2.0 Stem Mount Remote Reservoir Shock (RAP-10124)',                            msrp:480},
+  '80227':    {desc:'Kelderman-Raptor Shock Reservoir Aluminum Split Clamp Bracket, 2.12" Dia (RAP-51388)',          msrp:30},
+  '80550':    {desc:'Kelderman-Raptor Shock Reservoir Split Clamp Bolt Kit (Required with 80227)',                   msrp:0},
+  // ── Shocks — 10-12" Lift ──
+  '10003380': {desc:'Kelderman-Raptor 2.0 Stem Mount Remote Reservoir Shock (RAP-10092) — 10-12" Lift Front',       msrp:480},
+  '10003384': {desc:'Kelderman-Raptor 2.0 Remote Reservoir Shock (RAP-10096) — 10-12" Lift Rear',                   msrp:480},
+  '10004022': {desc:'Kelderman-Raptor 2.0 Shock Remote Reservoir Mounting Kit — 2017+ Ford Super Duty Lift Kits',   msrp:180},
+  // ── Shocks — Monotube ──
+  '10015855': {desc:'Kelderman-Raptor 2.0 Monotube Shock — 2017+ Ford F-450/F-550 Front',                           msrp:390},
+  '10015856': {desc:'Kelderman-Raptor 2.0 Bushing Mount Monotube Shock — 2023+ Ford Super Duty Pickup Rear',        msrp:390},
+  '10015798': {desc:'Kelderman-Raptor Monotube HD Rear Shock (RAP-10175) — 2023+ Ford F-450/F-550 Chassis Cab',     msrp:390},
+  // ── Dual Steering Stabilizer ──
+  '10015292': {desc:'Kit — 2023+ Ford F-250/F-350 Pickup 4WD, Dual Shock Steering Stabilizer Bracket',              msrp:320},
+  '10015862': {desc:'Kit — 2023+ Ford F-450/F-550/F-600 Pickup & Chassis Cab, Dual Shock Steering Stabilizer Bracket',msrp:320},
+  '10003382': {desc:'Kelderman-Raptor 2.0 Steering Stabilizer Monotube Shock (RAP-10158)',                           msrp:360},
+  // ── Radius Arms ──
+  '10015144': {desc:'2023+ Ford Super Duty Fabricated Radius Arms — Pickup',                                         msrp:1475},
+  '10034532': {desc:'Kit — 2023+ Ford F-450/F-550/F-600 Pickup & Chassis Cab, Adjustable Radius Arms (Kelderman Logo)',msrp:1475},
+  // ── Air Controls ──
+  'SLKD2WD':  {desc:'Kit — Self-Leveling: Viair Compressor, 3-Gal Tank, (2) HCV, (2) Dump Valves, Air Dryer, Panel',msrp:2325},
+  'HCVLK':    {desc:'Kit — Haldex Height Control Valve w/ Front Linkage — Mechanical, 1 Corner',                    msrp:175},
+  '30664':    {desc:'Kit — Dual VIAIR Compressor w/ Dryer, Dual Tank, Dump Valve — Mechanical 2-Corner',             msrp:3200},
+  'ESLK3H2':  {desc:'Air Lift 3H Electronic Air Control System',                                                     msrp:4475},
+  '10015203': {desc:'2023+ Ford Super Duty Overhead Console — Air Lift 3H Remote Mount',                             msrp:250},
+  '10040872': {desc:'Air Lift ALP4 Controls / Compressor Box — 4-Corner Electronic w/ Dryer (Spare Tire Keeper)',    msrp:4675},
+  // ── GM Silverado 4500/5500/6500 ──────────────────────────────
+  '10014749': {desc:'Kit — 2019+ GM Silverado 4500/5500/6500 2WD Front Air Suspension (Incl. DSS, Shocks)',          msrp:4750},
+  '10006664': {desc:'Kit — 2019+ GM Silverado 4500/5500/6500 4WD 4-Link Front Air Suspension (Incl. DSS, Shocks)',   msrp:6900},
+  '10015498': {desc:'Kit — 2" Lift Spacers — 2019+ GM Silverado 4500/5500/6500 4WD',                                 msrp:350},
+  '10040696': {desc:'Kit — 2019+ GM Silverado 4500/5500/6500 4-Link Rear Air Suspension',                             msrp:6450},
+  'HCVRLK':   {desc:'Kit — Haldex Height Control Valve w/ Rear Linkage Kit — 1 Corner (4-Link Rear)',                 msrp:200},
+  '2002174':  {desc:'3-Gallon Supplemental Air Tank — OEM Air Supply Compatible',                                     msrp:278},
+  '51667':    {desc:'Kit — Dual Dump Valve Kit',                                                                      msrp:175},
+  '10031767': {desc:'2019+ GM Silverado 4500/5500/6500 Overhead Console — Air Lift 3H Remote Mount',                  msrp:250},
+};
+
+const price = pn => (P[pn]||{}).msrp ?? 0;
+const cost  = parts => parts.reduce((s,{pn,qty}) => s + price(pn)*qty, 0);
+const fmt   = n => n === 0 ? 'Included' : '$' + Number(n).toLocaleString('en-US',{minimumFractionDigits:2});
+const fmtU  = n => n === 0 ? '$0.00' : '$' + Number(n).toLocaleString('en-US',{minimumFractionDigits:2});
+
+// ── Kit Definitions ───────────────────────────────────────────
+const KIT = {
+  'pickup-stock': {
+    kitLabel:'Stock Height Air Suspension', shocksRequired:false, armsIncluded:false,
+    ccStyle:false, airFull:true, hasCradle:false, armsPn:'10015144', armsLabel:'Fabricated Radius Arms',
+    vehicles:[
+      {val:'F250',    label:'F-250 Pickup',       sub:'SRW · 3.5" or 4.0" rear axle options',    frontPn:'KLM69003', dss:'10015292', drw:false,
+        axleOpts:[{val:'3.5',label:'3.5" Rear Axle',rearPn:'10015188'},{val:'4.0',label:'4.0" Rear Axle',rearPn:'10015168'}]},
+      {val:'F350SRW', label:'F-350 Pickup (SRW)',  sub:'SRW · 4.0" rear axle',                    frontPn:'KLM69003', dss:'10015292', drw:false,
+        axleOpts:[{val:'4.0',label:'4.0" Rear Axle',rearPn:'10015168'}]},
+      {val:'F350DRW', label:'F-350 Pickup (DRW)',  sub:'DRW · 4.5" rear axle',                    frontPn:'KLM69003', dss:'10015292', drw:true,
+        axleOpts:[{val:'4.5',label:'4.5" Rear Axle',rearPn:'10015113'}]},
+      {val:'F450',    label:'F-450 Pickup',        sub:'DRW · 4.5" rear axle',                    frontPn:'KLM69020', dss:'10015862', drw:true,
+        axleOpts:[{val:'4.5',label:'4.5" Rear Axle',rearPn:'10015113'}]},
+    ],
+  },
+  'pickup-2-3': {
+    kitLabel:'2-3" Lift Air Suspension', shocksRequired:false, armsIncluded:true,
+    ccStyle:false, airFull:true, hasCradle:false, armsPn:null, armsLabel:null,
+    vehicles:[
+      {val:'F250',    label:'F-250 Pickup',       sub:'SRW · 3.5" or 4.0" rear axle options · Radius arms included', frontPn:'10032358', dss:'10015292', drw:false,
+        axleOpts:[{val:'3.5',label:'3.5" Rear Axle',rearPn:'10015188'},{val:'4.0',label:'4.0" Rear Axle',rearPn:'10015168'}]},
+      {val:'F350SRW', label:'F-350 Pickup (SRW)',  sub:'SRW · 4.0" rear axle · Radius arms included',               frontPn:'10032358', dss:'10015292', drw:false,
+        axleOpts:[{val:'4.0',label:'4.0" Rear Axle',rearPn:'10015168'}]},
+      {val:'F350DRW', label:'F-350 Pickup (DRW)',  sub:'DRW · 4.5" rear axle · Radius arms included',               frontPn:'10032358', dss:'10015292', drw:true,
+        axleOpts:[{val:'4.5',label:'4.5" Rear Axle',rearPn:'10015113'}]},
+      {val:'F450',    label:'F-450 Pickup',        sub:'DRW · 4.5" rear axle · Radius arms included',               frontPn:'10016213', dss:'10015862', drw:true,
+        axleOpts:[{val:'4.5',label:'4.5" Rear Axle',rearPn:'10015113'}]},
+    ],
+  },
+  'pickup-5-6': {
+    kitLabel:'5-6" Lift Air Suspension', shocksRequired:false, armsIncluded:true,
+    ccStyle:false, airFull:true, hasCradle:false, armsPn:null, armsLabel:null,
+    vehicles:[
+      {val:'F250',    label:'F-250 Pickup',       sub:'SRW · 3.5" or 4.0" rear axle options · Radius arms included', frontPn:'10015169', dss:'10015292', drw:false,
+        axleOpts:[{val:'3.5',label:'3.5" Rear Axle',rearPn:'10015243'},{val:'4.0',label:'4.0" Rear Axle',rearPn:'10015242'}]},
+      {val:'F350SRW', label:'F-350 Pickup (SRW)',  sub:'SRW · 4.0" rear axle · Radius arms included',               frontPn:'10015169', dss:'10015292', drw:false,
+        axleOpts:[{val:'4.0',label:'4.0" Rear Axle',rearPn:'10015242'}]},
+      {val:'F350DRW', label:'F-350 Pickup (DRW)',  sub:'DRW · 4.5" rear axle · Radius arms included',               frontPn:'10015169', dss:'10015292', drw:true,
+        axleOpts:[{val:'4.5',label:'4.5" Rear Axle',rearPn:'10015191'}]},
+      {val:'F450',    label:'F-450 Pickup',        sub:'DRW · 4.5" rear axle · Radius arms included',               frontPn:'10015956', dss:'10015862', drw:true,
+        axleOpts:[{val:'4.5',label:'4.5" Rear Axle',rearPn:'10015191'}]},
+    ],
+  },
+  'pickup-10-12': {
+    kitLabel:'10-12" Lift Air Suspension', shocksRequired:true, armsIncluded:true,
+    ccStyle:false, airFull:true, hasCradle:true, armsPn:null, armsLabel:null,
+    autoShockParts:[{pn:'10003380',qty:2},{pn:'10003384',qty:2},{pn:'10004022',qty:1}],
+    steeringNote:'SK7550E — PSC Big Bore XD® Cylinder Assist® Steering Gear required. Customer sources from Precision Steering Components.',
+    // F-250 and F-350 only — no F-450
+    vehicles:[
+      {val:'F250',    label:'F-250 Pickup',       sub:'SRW · 3.5" or 4.0" rear axle options', frontPn:'10032606', dss:'10015292', drw:false,
+        axleOpts:[{val:'3.5',label:'3.5" Rear Axle',rearPn:'10040427'},{val:'4.0',label:'4.0" Rear Axle',rearPn:'10032609'}]},
+      {val:'F350SRW', label:'F-350 Pickup (SRW)',  sub:'SRW · 3.5" or 4.0" rear axle',        frontPn:'10032606', dss:'10015292', drw:false,
+        axleOpts:[{val:'3.5',label:'3.5" Rear Axle',rearPn:'10040427'},{val:'4.0',label:'4.0" Rear Axle',rearPn:'10032609'}]},
+      {val:'F350DRW', label:'F-350 Pickup (DRW)',  sub:'DRW · 4.5" rear axle · Long box',     frontPn:'10032606', dss:'10015292', drw:true,
+        axleOpts:[{val:'4.5',label:'4.5" Rear Axle',rearPn:'10040935'}]},
+    ],
+  },
+  'cc-stock': {
+    kitLabel:'Stock Height Air Suspension', shocksRequired:true, armsIncluded:false,
+    ccStyle:true, airFull:false, hasCradle:false, armsPn:'10034532', armsLabel:'Adjustable Radius Arms',
+    autoShockParts:[{pn:'10015855',qty:2},{pn:'10015798',qty:2}],
+    fixedVehicle:{label:'F-450 / F-550 / F-600', frontPn:'KLM69500', rearPn:'10014700', dss:'10015862'},
+  },
+  'cc-lowering': {
+    kitLabel:'2.5" Lowering Air Suspension', shocksRequired:true, armsIncluded:false,
+    ccStyle:true, airFull:false, hasCradle:false, armsPn:'10034532', armsLabel:'Adjustable Radius Arms',
+    autoShockParts:[{pn:'10015855',qty:2},{pn:'10015798',qty:2}],
+    fixedVehicle:{label:'F-450 / F-550 / F-600', frontPn:'KLM69500', rearPn:'10029801', dss:'10015862'},
+  },
+  'gm-cc-stock': {
+    kitLabel:'Stock Height Air Suspension', shocksRequired:false, armsIncluded:true,
+    ccStyle:false, airFull:false, hasCradle:false, gmStyle:true,
+    armsPn:null, armsLabel:null,
+  },
+};
+
+const KIT_LABELS = {
+  'pickup-stock':'Stock Height','pickup-2-3':'2-3" Lift','pickup-5-6':'5-6" Lift','pickup-10-12':'10-12" Lift',
+  'cc-stock':'Stock Height','cc-lowering':'2.5" Lowering',
+  'gm-cc-stock':'Stock Height',
+};
+
+const BODY_OPTS = [
+  {val:'pickup',      label:'Ford Super Duty Pickup',       sub:'F-250 · F-350 · F-450 — Stock Height, 2-3", 5-6", 10-12" Lift',  kits:['pickup-stock','pickup-2-3','pickup-5-6','pickup-10-12']},
+  {val:'chassis-cab', label:'Ford Chassis Cab',             sub:'F-450 / F-550 / F-600 — Stock Height or 2.5" Lowering',           kits:['cc-stock','cc-lowering']},
+  {val:'gm-cc',       label:'GM Silverado 4500/5500/6500',  sub:'2019+ Chassis Cab — 2WD or 4WD · Stock Height',                   kits:['gm-cc-stock']},
+];
+
+const SHOCK_OPTS_PICKUP = [
+  {val:'none',       label:'No Shocks',desc:'Add shocks separately',parts:[]},
+  {val:'rr-front',   label:'Remote Reservoir — Front Only',
+    desc:'Kelderman-Raptor 2.0 remote reservoir shocks, front axle. Clamp brackets + bolt kit included.',
+    parts:[{pn:'10006722',qty:2},{pn:'80227',qty:4},{pn:'80550',qty:4}]},
+  {val:'rr-both',    label:'Remote Reservoir — Front & Rear (Kit)',
+    desc:'Combined Raptor 2.0 remote reservoir shock kit, front and rear.',
+    parts:[{pn:'10008956',qty:1}]},
+  {val:'mono-front', label:'Monotube — Front Only',
+    desc:'Kelderman-Raptor 2.0 monotube shocks, front axle.',
+    parts:[{pn:'10015855',qty:2}]},
+  {val:'mono-both',  label:'Monotube — Front & Rear',
+    desc:'Kelderman-Raptor 2.0 monotube shocks, front and rear.',
+    parts:[{pn:'10015855',qty:2},{pn:'10015856',qty:2}]},
+];
+
+const CTRL_FULL = [
+  {val:'none',        label:'No Controls',desc:'Air management sold separately',parts:[]},
+  {val:'slkd-single', label:'Mechanical Self-Leveling — Single Compressor',
+    desc:'SLKD2WD kit + HCV linkage kits (2 corners).',
+    parts:[{pn:'SLKD2WD',qty:1},{pn:'HCVLK',qty:2}]},
+  {val:'dual-comp',   label:'Mechanical Self-Leveling — Dual Compressor',
+    desc:'Dual VIAIR compressor/controls box + HCV linkage kits (2 corners).',
+    parts:[{pn:'30664',qty:1},{pn:'HCVLK',qty:2}]},
+  {val:'eslk3h2',     label:'Air Lift 3H Electronic',
+    desc:'Air Lift 3H electronic system. Smartphone/wireless pad control.',
+    parts:[{pn:'ESLK3H2',qty:1}]},
+  {val:'eslk3h2-con', label:'Air Lift 3H Electronic + Overhead Console Mount',
+    desc:'Air Lift 3H with overhead console remote mount.',
+    parts:[{pn:'ESLK3H2',qty:1},{pn:'10015203',qty:1}]},
+  {val:'alp4',        label:'Air Lift 3H — Spare Tire Keeper',
+    desc:'Air Lift ALP4 compressor/controls box, 4-corner electronic w/ dryer.',
+    parts:[{pn:'10040872',qty:1}]},
+  {val:'alp4-con',    label:'Air Lift 3H — Spare Tire Keeper + Overhead Console',
+    desc:'ALP4 spare tire keeper + overhead console remote mount.',
+    parts:[{pn:'10040872',qty:1},{pn:'10015203',qty:1}]},
+];
+const CTRL_CC = CTRL_FULL.filter(o => !o.val.startsWith('alp4'));
+
+// ── GM Air Control Packages ───────────────────────────────────
+const GM_CTRL_FULL = [
+  {val:'none',      label:'Manual Fill',
+    desc:'No controls — use built-in Schrader valves to fill/deflate manually.',parts:[]},
+  {val:'mech-dual', label:'Mechanical Self-Leveling — Dual Compressor',
+    desc:'30664 dual VIAIR compressor+tank system (includes 2 rear HCV linkages, dump valves, dryer) + HCVLK ×2 for front. Most common option.',
+    parts:[{pn:'30664',qty:1},{pn:'HCVLK',qty:2}]},
+  {val:'3h2',       label:'Air Lift 3H Electronic',
+    desc:'Air Lift 3H electronic system. Bluetooth/app control, self-leveling at all 4 corners.',
+    parts:[{pn:'ESLK3H2',qty:1}]},
+  {val:'3h2-con',   label:'Air Lift 3H Electronic + Overhead Console Mount',
+    desc:'Air Lift 3H with GM Silverado overhead console remote mount.',
+    parts:[{pn:'ESLK3H2',qty:1},{pn:'10031767',qty:1}]},
+  {val:'oem-air',   label:'Factory OEM Air Supply Compatible',
+    desc:'Uses truck\'s factory compressor. Adds front HCV linkages ×2, rear HCV linkages ×2, 3-gal supplemental tank, and dual dump valve kit.',
+    parts:[{pn:'HCVLK',qty:2},{pn:'HCVRLK',qty:2},{pn:'2002174',qty:1},{pn:'51667',qty:1}]},
+];
+const GM_CTRL_REAR = [
+  {val:'none',        label:'Manual Fill',
+    desc:'No controls — fill/deflate manually via Schrader valves.',parts:[]},
+  {val:'mech-dual',   label:'Mechanical Self-Leveling — Dual Compressor',
+    desc:'30664 dual VIAIR compressor+tank system. Includes 2 rear HCV linkages, dump valves, and dryer.',
+    parts:[{pn:'30664',qty:1}]},
+  {val:'hcvrlk-only', label:'HCVRLK ×2 Only (Requires Existing Air Supply)',
+    desc:'Rear height control valve linkages only. Requires factory or onboard air supply.',
+    parts:[{pn:'HCVRLK',qty:2}]},
+  {val:'hcvrlk-dump', label:'HCVRLK ×2 + Dual Dump Valve Kit',
+    desc:'Rear HCV linkages with dual dump valve kit. Requires existing air supply.',
+    parts:[{pn:'HCVRLK',qty:2},{pn:'51667',qty:1}]},
+  {val:'oem-air',     label:'Factory OEM Air Supply Compatible',
+    desc:'Full rear setup: 3-gal supplemental tank + rear HCV linkages ×2 + dual dump valve kit.',
+    parts:[{pn:'2002174',qty:1},{pn:'HCVRLK',qty:2},{pn:'51667',qty:1}]},
+];
+const GM_CTRL_FRONT = [
+  {val:'none',        label:'Manual Fill',
+    desc:'No controls — fill/deflate manually via Schrader valves.',parts:[]},
+  {val:'mech-dual',   label:'Mechanical Self-Leveling — Dual Compressor',
+    desc:'30664 dual VIAIR compressor+tank system + HCVLK ×2 for front.',
+    parts:[{pn:'30664',qty:1},{pn:'HCVLK',qty:2}]},
+  {val:'hcvlk-only',  label:'HCVLK ×2 Only (Requires Existing Air Supply)',
+    desc:'Front height control valve linkages only. Requires factory or onboard air supply.',
+    parts:[{pn:'HCVLK',qty:2}]},
+  {val:'hcvlk-dump',  label:'HCVLK ×2 + Dual Dump Valve Kit',
+    desc:'Front HCV linkages with dual dump valve kit. Requires existing air supply.',
+    parts:[{pn:'HCVLK',qty:2},{pn:'51667',qty:1}]},
+  {val:'oem-air',     label:'Factory OEM Air Supply Compatible',
+    desc:'Full front setup: front HCV linkages ×2 + 3-gal supplemental tank + dual dump valve kit.',
+    parts:[{pn:'HCVLK',qty:2},{pn:'2002174',qty:1},{pn:'51667',qty:1}]},
+];
+const getGMCtrlOpts = () =>
+  S.scope==='rear-only'  ? GM_CTRL_REAR  :
+  S.scope==='front-only' ? GM_CTRL_FRONT : GM_CTRL_FULL;
+
+// ── State ─────────────────────────────────────────────────────
+const S = {body:null,kit:null,model:null,axle:null,box:null,cradle:'none',drive:null,scope:null,spacers:'none',shocks:'none',dss:'none',arms:'none',ctrl:'none'};
+
+const getKD  = () => S.kit ? KIT[S.kit] : null;
+const getV   = () => { const kd=getKD(); return kd&&!kd.ccStyle&&!kd.gmStyle ? (kd.vehicles||[]).find(v=>v.val===S.model)||null : null; };
+const getAxO = () => { const v=getV(); return v ? v.axleOpts.find(a=>a.val===S.axle)||null : null; };
+const needsAxleChoice = () => { const v=getV(); return v && v.axleOpts.length>1; };
+const is1012  = () => S.kit === 'pickup-10-12';
+const isDRW   = () => { const v=getV(); return v ? v.drw : false; };
+const isGM    = () => S.body === 'gm-cc';
+
+function isReady() {
+  const kd = getKD(); if(!kd) return false;
+  if(kd.gmStyle) return !!(S.drive && S.scope);
+  if(kd.ccStyle) return true;
+  if(!S.model) return false;
+  if(needsAxleChoice() && !S.axle) return false;
+  if(is1012() && !isDRW() && !S.box) return false;
+  return true;
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+const lock = (id,v) => document.getElementById(id).classList.toggle('locked',v);
+const done = (id,v) => document.getElementById(id).classList.toggle('done',v);
+const setpv = (id,t) => document.getElementById(id).textContent = t;
+
+function radioGroup(cid, name, opts, current, onChange) {
+  const el = document.getElementById(cid); el.innerHTML='';
+  opts.forEach(opt => {
+    const c = cost(opt.parts||[]);
+    const priceStr = (opt.parts&&opt.parts.length&&opt.val!=='none') ? fmt(c) : '';
+    const pnsStr   = (opt.parts||[]).filter(p=>price(p.pn)>0).map(p=>`${p.pn} ×${p.qty}`).join(' · ');
+    const lbl = document.createElement('label');
+    lbl.className = 'rc'+(opt.val===current?' active':'');
+    lbl.innerHTML = `<input type="radio" name="${name}" value="${opt.val}"${opt.val===current?' checked':''}>`
+      +`<div><div class="rc-label">${opt.label}</div>`
+      +(opt.desc||opt.sub?`<div class="rc-sub">${opt.desc||opt.sub}</div>`:'')
+      +(priceStr?`<div class="rc-price">${priceStr}</div>`:'')
+      +(pnsStr  ?`<div class="rc-pns">${pnsStr}</div>`:'')
+      +`</div>`;
+    lbl.querySelector('input').onchange = () => onChange(opt.val);
+    el.appendChild(lbl);
+  });
+}
+
+// ── Render Steps ──────────────────────────────────────────────
+function renderBody() {
+  radioGroup('rg-body','body', BODY_OPTS.map(o=>({val:o.val,label:o.label,desc:o.sub,parts:[]})),
+    S.body, val=>{
+      S.body=val;S.kit=null;S.model=null;S.axle=null;S.box=null;S.cradle='none';
+      S.drive=null;S.scope=null;S.spacers='none';
+      S.shocks='none';S.dss='none';S.arms='none';S.ctrl='none';render();});
+  done('sc-body',!!S.body);
+  setpv('pv-body',BODY_OPTS.find(o=>o.val===S.body)?.label||'');
+}
+
+function renderDrive() {
+  if(!isGM()){lock('sc-drive',true);setpv('pv-drive','');return;}
+  const opts=[
+    {val:'2wd',label:'2WD — Two-Wheel Drive',desc:'Front Kit: 10014749 · $4,750',parts:[]},
+    {val:'4wd',label:'4WD — Four-Wheel Drive',desc:'Front Kit: 10006664 · $6,900',parts:[]},
+  ];
+  lock('sc-drive',!S.kit); done('sc-drive',!!S.drive);
+  radioGroup('rg-drive','drive',opts,S.drive,val=>{S.drive=val;S.scope=null;S.spacers='none';S.ctrl='none';render();});
+  setpv('pv-drive',S.drive?S.drive.toUpperCase():'');
+}
+
+function renderScope() {
+  if(!isGM()){lock('sc-scope',true);setpv('pv-scope','');return;}
+  const fPn=S.drive==='2wd'?'10014749':'10006664';
+  const opts=[
+    {val:'front-rear',  label:'Front + Rear Air Suspension',
+      desc:`Full air ride system. Front (${fPn||'—'}) + Rear (10040696).`,parts:[]},
+    {val:'front-only',  label:'Front Air Suspension Only',
+      desc:`Front kit only. ${fPn||'Select drivetrain above.'}`+' Rear suspension unchanged.',parts:[]},
+    {val:'rear-only',   label:'Rear Air Suspension Only',
+      desc:'Rear kit only (10040696). Front suspension unchanged.',parts:[]},
+  ];
+  lock('sc-scope',!S.drive); done('sc-scope',!!S.scope);
+  radioGroup('rg-scope','scope',opts,S.scope,val=>{S.scope=val;S.spacers='none';S.ctrl='none';render();});
+  const lbl={'front-rear':'Front + Rear','front-only':'Front Only','rear-only':'Rear Only'};
+  setpv('pv-scope',S.scope?lbl[S.scope]:'');
+}
+
+function renderSpacers() {
+  const show=isGM()&&S.drive==='4wd'&&S.scope&&S.scope!=='rear-only';
+  if(!show){lock('sc-spacers',true);setpv('pv-spacers','');return;}
+  const opts=[
+    {val:'none',label:'No Lift Spacers',desc:'Standard 4WD front kit height.',parts:[]},
+    {val:'add', label:'Add 2" Lift Spacers',desc:'Adds approximately 2" of front lift height. Fits 4WD only.',
+      parts:[{pn:'10015498',qty:1}]},
+  ];
+  lock('sc-spacers',!S.scope); done('sc-spacers',S.spacers==='add');
+  radioGroup('rg-spacers','spacers',opts,S.spacers,val=>{S.spacers=val;render();});
+  setpv('pv-spacers',S.spacers==='add'?'Added':'');
+}
+
+function renderKit() {
+  const bo = BODY_OPTS.find(o=>o.val===S.body);
+  if(!bo) return;
+  radioGroup('rg-kit','kit', bo.kits.map(k=>({val:k,label:KIT_LABELS[k],desc:KIT[k].kitLabel,parts:[]})),
+    S.kit, val=>{S.kit=val;S.model=null;S.axle=null;S.box=null;S.cradle='none';S.drive=null;S.scope=null;S.spacers='none';S.shocks='none';S.dss='none';S.arms='none';S.ctrl='none';render();});
+  lock('sc-kit',!S.body); done('sc-kit',!!S.kit);
+  setpv('pv-kit',S.kit?KIT_LABELS[S.kit]:'');
+}
+
+function renderModel() {
+  const kd=getKD(); if(!kd||kd.ccStyle){lock('sc-model',true);return;}
+  radioGroup('rg-model','model', kd.vehicles.map(v=>({val:v.val,label:v.label,desc:v.sub,parts:[]})),
+    S.model, val=>{S.model=val;S.axle=null;S.box=null;S.cradle='none';S.shocks='none';S.dss='none';S.arms='none';S.ctrl='none';render();});
+  lock('sc-model',!S.kit); done('sc-model',!!S.model);
+  setpv('pv-model',getV()?.label||'');
+}
+
+function renderAxle() {
+  const v=getV();
+  if(!v||!needsAxleChoice()){lock('sc-axle',true);setpv('pv-axle','');return;}
+  radioGroup('rg-axle','axle', v.axleOpts.map(a=>({val:a.val,label:a.label,desc:'',parts:[{pn:a.rearPn,qty:1}]})),
+    S.axle, val=>{S.axle=val;S.box=null;S.cradle='none';render();});
+  lock('sc-axle',!S.model); done('sc-axle',!!S.axle);
+  setpv('pv-axle',getAxO()?.label||'');
+}
+
+function renderBox() {
+  // Only visible for 10-12" SRW trucks
+  if(!is1012()||isDRW()||!S.model){lock('sc-box',true);setpv('pv-box','');return;}
+  const opts=[
+    {val:'short',label:'Short Box (160" WB)',desc:'Crew Cab Short Box — Center Cradle: 10032603',parts:[]},
+    {val:'long', label:'Long Box (176" WB)', desc:'Crew Cab Long Box — Center Cradle: 10040770',parts:[]},
+  ];
+  radioGroup('rg-box','box',opts,S.box, val=>{S.box=val;S.cradle='none';render();});
+  lock('sc-box',!S.axle&&needsAxleChoice()||!S.model); done('sc-box',!!S.box);
+  setpv('pv-box',S.box==='short'?'Short Box':S.box==='long'?'Long Box':'');
+}
+
+function renderCradle() {
+  if(!is1012()){lock('sc-cradle',true);setpv('pv-cradle','');return;}
+  // Need box selected (SRW) or axle selected (DRW auto-long)
+  const boxReady = isDRW() ? !!S.axle : !!S.box;
+  lock('sc-cradle',!boxReady);
+  const cradlePn = isDRW() ? '10040770' : (S.box==='short'?'10032603':'10040770');
+  const cradleLabel = isDRW()||S.box==='long' ? 'Long Box Cradle (10040770, 176WB)' : 'Short Box Cradle (10032603, 160WB)';
+  const opts=[
+    {val:'none',label:'No Center Cradle',desc:'Center cradle not included in this build',parts:[]},
+    {val:'add', label:'Add Center Cradle',desc:cradleLabel,parts:[{pn:cradlePn,qty:1}]},
+  ];
+  radioGroup('rg-cradle','cradle',opts,S.cradle,val=>{S.cradle=val;render();});
+  done('sc-cradle',S.cradle==='add');
+  setpv('pv-cradle',S.cradle==='add'?'Added':'');
+}
+
+function renderShocks() {
+  const kd=getKD();
+  if(kd?.gmStyle){lock('sc-shocks',true);setpv('pv-shocks','');return;}
+  lock('sc-shocks',!isReady());
+  if(kd?.shocksRequired){
+    const label = is1012()
+      ? 'Remote reservoir shocks required for this kit — (2) front (10003380), (2) rear (10003384), (1) mounting kit (10004022).'
+      : 'Monotube shocks are required for this kit — (2) front shocks (10015855) and (2) rear shocks (10015798). No other option available.';
+    document.getElementById('sb-shocks-body').innerHTML =
+      `<div class="info-box blue">ℹ️ <div><strong>${is1012()?'Remote reservoir shocks required':'Monotube shocks required'}</strong> — ${label}</div></div>`;
+    document.getElementById('sb-shocks').textContent='Required';
+    document.getElementById('sb-shocks').className='step-badge req';
+    done('sc-shocks',true); setpv('pv-shocks',is1012()?'Remote Res. Included':'Monotube Included');
+  } else {
+    document.getElementById('sb-shocks').textContent='Optional';
+    document.getElementById('sb-shocks').className='step-badge';
+    const el=document.getElementById('sb-shocks-body');
+    el.innerHTML='<div class="radio-group" id="rg-shocks"></div>';
+    radioGroup('rg-shocks','shocks',SHOCK_OPTS_PICKUP,S.shocks,val=>{S.shocks=val;render();});
+    const so=SHOCK_OPTS_PICKUP.find(o=>o.val===S.shocks);
+    done('sc-shocks',S.shocks!=='none');
+    setpv('pv-shocks',so&&so.val!=='none'?so.label:'');
+  }
+}
+
+function renderSteering() {
+  const show = is1012() && isReady();
+  lock('sc-steering',!show);
+  done('sc-steering', show);
+}
+
+function renderDSS() {
+  const kd=getKD();
+  if(kd?.gmStyle){lock('sc-dss',true);setpv('pv-dss','');return;}
+  const v=getV();
+  const bracketPn = kd?.ccStyle ? kd.fixedVehicle.dss : (v?.dss||'10015292');
+  const opts=[
+    {val:'none',          label:'No Steering Stabilizer Upgrade',desc:'Stock stabilizer retained',parts:[]},
+    {val:'bracket-only',  label:'Dual Steering Stabilizer Bracket',desc:'Bracket only — shocks sold separately',parts:[{pn:bracketPn,qty:1}]},
+    {val:'bracket-shocks',label:'Dual Steering Stabilizer Bracket + Raptor Shocks',
+      desc:'Bracket + (2) Kelderman-Raptor monotube steering stabilizers',
+      parts:[{pn:bracketPn,qty:1},{pn:'10003382',qty:2}]},
+  ];
+  lock('sc-dss',!isReady());
+  radioGroup('rg-dss','dss',opts,S.dss,val=>{S.dss=val;render();});
+  done('sc-dss',S.dss!=='none');
+  setpv('pv-dss',{none:'','bracket-only':'Bracket Only','bracket-shocks':'Bracket + Shocks'}[S.dss]||'');
+}
+
+function renderArms() {
+  const kd=getKD();
+  if(!kd||kd.armsIncluded||kd.gmStyle){lock('sc-arms',true);setpv('pv-arms','');return;}
+  const opts=[
+    {val:'none',label:'No Radius Arm Upgrade',desc:'Stock radius arms',parts:[]},
+    {val:'arms',label:kd.armsLabel||'Add Radius Arms',desc:'2023+ Ford Super Duty — pair',parts:[{pn:kd.armsPn,qty:1}]},
+  ];
+  lock('sc-arms',!isReady());
+  radioGroup('rg-arms','arms',opts,S.arms,val=>{S.arms=val;render();});
+  done('sc-arms',S.arms!=='none'); setpv('pv-arms',S.arms==='arms'?'Added':'');
+}
+
+function renderCtrl() {
+  const kd=getKD();
+  let ctrlOpts;
+  if(kd?.gmStyle)          ctrlOpts=getGMCtrlOpts();
+  else if(kd&&!kd.airFull) ctrlOpts=CTRL_CC;
+  else                     ctrlOpts=CTRL_FULL;
+  lock('sc-ctrl',!isReady());
+  radioGroup('rg-ctrl','ctrl',ctrlOpts,S.ctrl,val=>{S.ctrl=val;render();});
+  const co=ctrlOpts.find(o=>o.val===S.ctrl);
+  done('sc-ctrl',S.ctrl!=='none'); setpv('pv-ctrl',co&&co.val!=='none'?co.label:'');
+}
+
+// ── Summary ───────────────────────────────────────────────────
+function renderSummary() {
+  const body=document.getElementById('sum-body'), footer=document.getElementById('sum-footer');
+  if(!S.kit){body.innerHTML='<div class="sum-empty">Select a body style and kit type to begin.</div>';footer.style.display='none';return;}
+
+  const kd=getKD(), v=getV(), fv=kd.ccStyle?kd.fixedVehicle:null, axO=getAxO();
+  const sections=[];
+
+  // ── GM Summary ─────────────────────────────────────────────
+  if(kd.gmStyle) {
+    if(!S.scope){body.innerHTML='<div class="sum-empty">Select drivetrain and build scope above.</div>';footer.style.display='none';return;}
+    const hasFront=S.scope!=='rear-only', hasRear=S.scope!=='front-only';
+    const fPn=S.drive==='2wd'?'10014749':'10006664';
+    if(hasFront){
+      sections.push({label:'Front Kit',parts:[{pn:fPn,qty:1}],
+        note:'✓ DSS assembly, front shocks & steering stabilizer shocks included in kit',noteClass:'ok'});
+      if(S.spacers==='add') sections.push({label:'2" Lift Spacers',parts:[{pn:'10015498',qty:1}]});
+    }
+    if(hasRear) sections.push({label:'Rear Kit',parts:[{pn:'10040696',qty:1}]});
+    const co=getGMCtrlOpts().find(o=>o.val===S.ctrl);
+    if(co&&co.val!=='none') sections.push({label:'Air Controls',parts:co.parts});
+    let html='',grand=0;
+    sections.forEach(sec=>{
+      html+=`<div class="sum-sec"><div class="sum-sec-lbl">${sec.label}</div>`;
+      if(sec.note) html+=`<div class="sum-row"><span class="s-note ${sec.noteClass||'ok'}">${sec.note}</span></div>`;
+      sec.parts.forEach(item=>{
+        const u=price(item.pn),line=u*item.qty; grand+=line;
+        const d=(P[item.pn]?.desc||item.pn); const desc=d.length>58?d.slice(0,56)+'…':d;
+        const pEl=u===0?`<span class="s-price s-free">Included</span>`:`<span class="s-price">${fmt(line)}</span>`;
+        html+=`<div class="sum-row"><span class="s-pn">${item.pn}</span><span class="s-desc">${desc}</span><span class="s-qty">×${item.qty} @ ${fmtU(u)}</span>${pEl}</div>`;
+      });
+      html+=`</div>`;
+    });
+    if(!html) html='<div class="sum-empty">Make selections above to build your kit.</div>';
+    body.innerHTML=html;
+    document.getElementById('total-amt').textContent=fmt(grand);
+    footer.style.display=grand>0?'block':'none';
+    return;
+  }
+
+  // ── Ford Summary ────────────────────────────────────────────
+  // Front Kit
+  const frontPn = kd.ccStyle?fv.frontPn:(v?.frontPn||null);
+  if(frontPn) sections.push({label:'Front Kit',parts:[{pn:frontPn,qty:1}],
+    note:kd.armsIncluded?'✓ Radius arms included in this kit':null,
+    noteClass:'ok'});
+
+  // Rear Kit
+  const rearPn = kd.ccStyle?fv.rearPn:(axO?.rearPn||null);
+  if(rearPn) sections.push({label:'Rear Kit',parts:[{pn:rearPn,qty:1}]});
+  else if(!kd.ccStyle&&v&&!axO) sections.push({label:'Rear Kit',parts:[],pending:'Select axle diameter above'});
+
+  // Center Cradle (10-12" only)
+  if(is1012()&&S.cradle==='add'){
+    const cPn = isDRW()||S.box==='long'?'10040770':'10032603';
+    sections.push({label:'Center Cradle',parts:[{pn:cPn,qty:1}]});
+  }
+
+  // Shocks
+  if(kd.shocksRequired){
+    sections.push({label:'Shocks — Required',parts:kd.autoShockParts,required:true});
+  } else {
+    const so=SHOCK_OPTS_PICKUP.find(o=>o.val===S.shocks);
+    if(so&&so.val!=='none') sections.push({label:'Shock Package',parts:so.parts});
+  }
+
+  // DSS
+  if(S.dss!=='none'){
+    const bracketPn=kd.ccStyle?fv.dss:(v?.dss||'10015292');
+    const dParts=[{pn:bracketPn,qty:1}];
+    if(S.dss==='bracket-shocks') dParts.push({pn:'10003382',qty:2});
+    sections.push({label:'Dual Steering Stabilizer',parts:dParts});
+  }
+
+  // Radius Arms
+  if(!kd.armsIncluded&&S.arms==='arms'&&kd.armsPn)
+    sections.push({label:'Radius Arms',parts:[{pn:kd.armsPn,qty:1}]});
+
+  // Air Controls
+  const ctrlOpts=(kd&&!kd.airFull)?CTRL_CC:CTRL_FULL;
+  const co=ctrlOpts.find(o=>o.val===S.ctrl);
+  if(co&&co.val!=='none') sections.push({label:'Air Controls',parts:co.parts});
+
+  let html='', grand=0;
+  sections.forEach(sec=>{
+    if(sec.pending){
+      html+=`<div class="sum-sec"><div class="sum-sec-lbl">${sec.label}</div>
+        <div class="sum-row"><span class="s-pn">—</span><span class="s-desc" style="color:var(--dim)">${sec.pending}</span><span></span><span class="s-price">—</span></div></div>`;
+      return;
+    }
+    html+=`<div class="sum-sec"><div class="sum-sec-lbl">${sec.label}</div>`;
+    if(sec.required) html+=`<div class="sum-row"><span class="s-note req">★ Required — no other shock option available for this kit</span></div>`;
+    if(sec.note)     html+=`<div class="sum-row"><span class="s-note ${sec.noteClass||'ok'}">${sec.note}</span></div>`;
+    sec.parts.forEach(item=>{
+      const u=price(item.pn), line=u*item.qty;
+      grand+=line;
+      const d=(P[item.pn]?.desc||item.pn);
+      const desc=d.length>58?d.slice(0,56)+'…':d;
+      const pEl=u===0?`<span class="s-price s-free">Included</span>`:`<span class="s-price">${fmt(line)}</span>`;
+      html+=`<div class="sum-row"><span class="s-pn">${item.pn}</span><span class="s-desc">${desc}</span><span class="s-qty">×${item.qty} @ ${fmtU(u)}</span>${pEl}</div>`;
+    });
+    html+=`</div>`;
+  });
+
+  // Steering Gear Reference (10-12" only)
+  if(is1012()&&isReady()){
+    html+=`<div class="sum-sec">
+      <div class="sum-ref-lbl">⚠ Customer-Sourced Part</div>
+      <div class="sum-ref-row">
+        <strong style="color:var(--gold)">SK7550E</strong> — PSC Big Bore XD® Cylinder Assist® Steering Gear<br>
+        <span style="font-size:11px;color:var(--dim)">Required for this kit. Customer sources directly from Precision Steering Components. Not included in MSRP total.</span>
+      </div>
+    </div>`;
+  }
+
+  if(!html) html='<div class="sum-empty">Make selections above to build your kit.</div>';
+  body.innerHTML=html;
+  document.getElementById('total-amt').textContent=fmt(grand);
+  footer.style.display=grand>0?'block':'none';
+}
+
+// ── Main Render ───────────────────────────────────────────────
+function render() {
+  const kd=getKD(), cc=kd?.ccStyle, gm=kd?.gmStyle;
+
+  renderBody();
+  renderKit();
+  renderDrive();
+  renderScope();
+  renderSpacers();
+
+  if(gm||cc){
+    lock('sc-model',true);lock('sc-axle',true);lock('sc-box',true);lock('sc-cradle',true);
+    setpv('pv-model','');setpv('pv-axle','');setpv('pv-box','');setpv('pv-cradle','');
+  } else {
+    renderModel();
+    const v=getV();
+    if(v&&v.axleOpts.length===1) S.axle=v.axleOpts[0].val;
+    if(needsAxleChoice()) renderAxle(); else lock('sc-axle',true);
+    if(is1012()&&v){
+      if(isDRW()) S.box='long';
+      renderBox();
+      renderCradle();
+    } else {
+      lock('sc-box',true); lock('sc-cradle',true);
+      setpv('pv-box',''); setpv('pv-cradle','');
+    }
+  }
+
+  renderShocks();
+  renderSteering();
+  renderDSS();
+  renderArms();
+  renderCtrl();
+  renderSummary();
+}
+
+function resetAll(){
+  Object.assign(S,{body:null,kit:null,model:null,axle:null,box:null,cradle:'none',drive:null,scope:null,spacers:'none',shocks:'none',dss:'none',arms:'none',ctrl:'none'});
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
